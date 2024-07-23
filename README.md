@@ -1,5 +1,12 @@
 # new_backend
 
+
+
+## 업데이트 이력
+- [2024-07-23 나현진] 유저 CRUD & 로그인, 명언 CRUD, postgreSQL 연결 및 초기화
+
+<br>
+
 ## 설치방법
 
 ```
@@ -9,6 +16,8 @@ python -m venv venv
 source ./venv/Scripts/activate
 pip install -r requirements.tx
 ```
+
+
 
 
 ## .env 파일
@@ -21,6 +30,8 @@ DB_PASSWORD='likelion12th_quote'
 DB_HOST='localhost'
 DB_PORT='5432'
 ```
+
+
 
 
 
@@ -50,6 +61,9 @@ project/
 ├── .gitignore        
 └── venv/               # 가상 환경
 ```
+
+
+
 
 
 
@@ -92,6 +106,8 @@ Quote {
 	created_at : datetime
 }
 ```
+
+
 
 
 
