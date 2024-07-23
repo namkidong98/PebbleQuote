@@ -14,10 +14,20 @@ class QuoteSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         tags_data = validated_data.pop('tag')
+        registrant=validated_data.pop('registrant') 
+        
+        #명언 생성
         quote = Quote.objects.create(**validated_data)
+
+        #태그추가
         for tag_data in tags_data:
             tag, created = Tag.objects.get_or_create(name=tag_data)
             quote.tag.add(tag)
+
+        #유저의 duplicate_quotes 업데이트(중복 방지)
+        if quote.id not in registrant.duplicate_quotes:
+            registrant.add_duplicate_quote(quote.id)
+        
         return quote
 
     def update(self, instance, validated_data):
