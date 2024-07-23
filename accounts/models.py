@@ -60,5 +60,12 @@ class User(AbstractBaseUser,PermissionsMixin):
 
     def __str__(self):
         return self.email
+    
+    def add_duplicate_quote(self,quote_id):
+        if quote_id not in self.duplicate_quotes:
+            self.duplicate_quotes.append(quote_id)
+            self.save()
+
+            
 
 

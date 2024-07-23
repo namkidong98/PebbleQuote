@@ -1,6 +1,7 @@
 from django.db import models
-from accounts.models import User,UserManager
-# Create your models here.
+# from django.contrib.auth import get_user_model
+from accounts.models import User,UserManager 
+
 
 class Quote(models.Model):
     content = models.CharField(max_length=100)
@@ -18,7 +19,7 @@ class Quote(models.Model):
     
 
 class Tag(models.Model):
-    mane=models.CharField(max_length=50)
+    name=models.CharField(max_length=50)
 
     def __str__(self):
         return self.name

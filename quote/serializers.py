@@ -14,10 +14,11 @@ class QuoteSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         tags_data = validated_data.pop('tag')
-        registrant=validated_data.pop('registrant') 
-        
+        registrant=validated_data['registrant']
+
         #명언 생성
         quote = Quote.objects.create(**validated_data)
+        #quote = Quote.objects.create(registrant=registrant, **validated_data)
 
         #태그추가
         for tag_data in tags_data:
