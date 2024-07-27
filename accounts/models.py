@@ -47,7 +47,7 @@ class User(AbstractBaseUser,PermissionsMixin):
     followers = ArrayField(models.PositiveIntegerField(), default=list, blank=True)
     following = ArrayField(models.PositiveIntegerField(), default=list, blank=True)
     registered_quotes = ArrayField(models.PositiveIntegerField(), default=list, blank=True)
-    liked_quotes = ArrayField(models.PositiveIntegerField(), default=list, blank=True)
+    # liked_quotes = ArrayField(models.PositiveIntegerField(), default=list, blank=True)
     duplicate_quotes=ArrayField(models.PositiveIntegerField(), default=list, blank=True) #추천받은 명언 리스트 저장(중복 추천 방지)
 
     is_active = models.BooleanField(default=True)
