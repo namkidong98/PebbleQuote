@@ -12,11 +12,11 @@ class Quote(models.Model):
   
 
     image = models.ImageField(upload_to='quotes/', null=True, blank=True)
-    liked_by = models.ManyToManyField(
-        User,
-        related_name='liked_quotes',
-        blank=True
-    )
+    # liked_by = models.ManyToManyField(
+    #     User,
+    #     related_name='liked_quotes',
+    #     blank=True
+    # )
     comments = models.TextField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     like_count = models.PositiveIntegerField(default=0)

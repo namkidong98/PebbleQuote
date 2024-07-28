@@ -3,10 +3,14 @@
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.response import Response
 from rest_framework import status
-from .models import Quote
+from .models import Quote,User
 from .serializers import QuoteSerializer
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from django.shortcuts import get_object_or_404
+from rest_framework.views import APIView
 # from .db_utils import vector_connect
 
 
@@ -17,18 +21,26 @@ class QuoteViewSet(ModelViewSet):
     serializer_class = QuoteSerializer
     
     
-    @action(detail=True, methods=['post'],permission_classes=[IsAuthenticated])
-    def like(self, request, pk=None):
-        quote = self.get_object()
-        user = request.user
+    
+class QuoteLikeView(APIView):
+    # authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticatedOrReadOnly]
 
-        # 이미 좋아요를 누른 경우
-        if quote.liked_by.filter(id=user.id).exists():
-            return Response({"detail": "You have already liked this quote."}, status=status.HTTP_400_BAD_REQUEST)
+    def post(self, request, pk):
+        # 현재 명언
+        quote = get_object_or_404(Quote, pk=pk)
+        # 현재 유저
+        profile = get_object_or_404(User, id=request.user.id)
+        # 해당 명언 좋아요 유무 파악
+        check_like_quote = profile.like_quotes.filter(id=pk)
 
-        # 좋아요 추가
-        quote.liked_by.add(user)
-        quote.like_count = quote.liked_by.count()  # 좋아요 개수 업데이트
-        quote.save()
-        
-        return Response({"detail": "Quote liked successfully!", "like_count": quote.like_count}, status=status.HTTP_200_OK)
+        if check_like_quote.exists():
+            profile.like_quotes.remove(quote)  # 현재 유저의 좋아요한 명언 목록에서 현재 명언 제거
+            quote.like_count -= 1  # 현재 명언의 좋아요 개수 하향
+            quote.save()
+            return Response('이미 선택하여 제거되었습니다', status=status.HTTP_200_OK)
+        else:
+            profile.like_quotes.add(quote)  # 현재 유저의 좋아요한 명언 목록에 현재 명언 추가
+            quote.like_count += 1  # 현재 명언의 좋아요 개수 상향
+            quote.save()
+            return Response('추가되었습니다', status=status.HTTP_200_OK)

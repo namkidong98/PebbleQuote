@@ -55,4 +55,4 @@ from accounts.models import User
 class QuoteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Quote
-        fields = ['content', 'description', 'author', 'image', 'liked_by', 'comments', 'created_at','like_count']
+        fields = ['content', 'description', 'author', 'image', 'comments', 'created_at','like_count']
