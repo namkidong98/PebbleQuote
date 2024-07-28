@@ -49,10 +49,18 @@
 #         return instance
 
 from rest_framework import serializers
-from .models import Quote
+from .models import Quote,Comment
 from accounts.models import User
 
 class QuoteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Quote
-        fields = ['content', 'description', 'author', 'image', 'comments', 'created_at','like_count']
+        fields = ['content', 'description', 'author', 'image', 'created_at','like_count']
+        
+
+class CommentSerializer(serializers.ModelSerializer):
+    user = serializers.ReadOnlyField(source='user.nickname')
+
+    class Meta:
+        model = Comment
+        fields = ['id', 'quote', 'created_at', 'user', 'content']

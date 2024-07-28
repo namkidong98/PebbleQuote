@@ -3,8 +3,8 @@
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.response import Response
 from rest_framework import status
-from .models import Quote,User
-from .serializers import QuoteSerializer
+from .models import Quote,User,Comment
+from .serializers import QuoteSerializer,CommentSerializer
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import TokenAuthentication
@@ -44,3 +44,33 @@ class QuoteLikeView(APIView):
             quote.like_count += 1  # 현재 명언의 좋아요 개수 상향
             quote.save()
             return Response('추가되었습니다', status=status.HTTP_200_OK)
+
+
+class CommentView(APIView):
+
+    permission_classes = [IsAuthenticatedOrReadOnly]
+
+    # 게시물에 해당하는 전체 댓글 조회
+    def get(self, request, pk):
+        comment = Comment.objects.filter(quote=pk)  
+        serializer = CommentSerializer(comment, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    # 게시물에 해당하는 댓글 생성
+    def post(self, request, pk):
+        comment = Comment()
+        comment.content = request.POST['content']
+        comment.quote = Quote(id=pk)
+        comment.user = request.user
+        comment.save()
+        return Response(data="생성되었습니다", status=status.HTTP_200_OK)
+
+    # # 게시물에 해당하는 단일 댓글 수정
+    # def put(self, request, pk, comment_pk):
+    #     comment = get_object_or_404(Comment, quote=pk, pk=comment_pk)
+    #     serializer = CommentSerializer(comment, data=request.data)
+    #     if serializer.is_valid():
+    #         if request.user == comment.user:
+    #             serializer.save()
+    #             return Response(serializer.data, status=status.HTTP_200_OK)
+    #     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

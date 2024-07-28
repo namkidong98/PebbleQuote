@@ -31,12 +31,10 @@ class LoginSerializer(serializers.Serializer):
 
 class ProfileSerializer(serializers.ModelSerializer):
     
-    permission_classes = [IsAuthenticated]
+   
     like_quotes = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
 
     class Meta:
         model = User
         fields = ['nickname', 'like_quotes', 'email', 'name']
-    
-
     
