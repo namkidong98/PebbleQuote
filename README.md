@@ -10,7 +10,7 @@
 
 ## 설치방법
 
-```
+```bash
 $ git clone https://github.com/mukzzanglion-team2/new_backend.git
 $ cd new_backend
 $ python -m venv venv
@@ -79,7 +79,7 @@ project/
 
 
 ## Model Schema
-```
+```javascript
 User {
 	id : PK(auto_increment)
 	
