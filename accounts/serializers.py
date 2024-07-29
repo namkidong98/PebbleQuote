@@ -8,7 +8,7 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = (
-            'id', 'email', 'password', 'nickname', 'name', 'age', 'phone', 'like_quotes'
+            'id', 'email', 'password', 'nickname', 'like_quotes'
         )
         extra_kwargs = {'password': {'write_only': True}}
 
@@ -17,24 +17,16 @@ class UserSerializer(serializers.ModelSerializer):
             email=validated_data['email'],
             password=validated_data['password'],
             nickname=validated_data['nickname'],
-            name=validated_data['name'],
-            age=validated_data['age'],
-            phone=validated_data['phone']
         )
         return user
 
 class LoginSerializer(serializers.Serializer):
     email = serializers.EmailField()
     password = serializers.CharField()
-    
-
 
 class ProfileSerializer(serializers.ModelSerializer):
-    
-   
     like_quotes = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
 
     class Meta:
         model = User
-        fields = ['nickname', 'like_quotes', 'email', 'name']
-    
+        fields = ['nickname', 'like_quotes', 'email']

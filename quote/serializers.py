@@ -1,3 +1,20 @@
+
+from rest_framework import serializers
+from .models import Quote,Comment
+from accounts.models import User
+
+class QuoteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Quote
+        fields = ['id', 'content', 'description', 'author', 'image', 'created_at','like_count']
+
+class CommentSerializer(serializers.ModelSerializer):
+    user = serializers.ReadOnlyField(source='user.nickname')
+    class Meta:
+        model = Comment
+        fields = ['id', 'quote', 'created_at', 'user', 'content']
+
+
 # quote/serializers.py
 
 # from rest_framework import serializers
@@ -47,20 +64,3 @@
 #             tag, created = Tag.objects.get_or_create(name=tag_data)
 #             instance.tag.add(tag)
 #         return instance
-
-from rest_framework import serializers
-from .models import Quote,Comment
-from accounts.models import User
-
-class QuoteSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Quote
-        fields = ['content', 'description', 'author', 'image', 'created_at','like_count']
-        
-
-class CommentSerializer(serializers.ModelSerializer):
-    user = serializers.ReadOnlyField(source='user.nickname')
-
-    class Meta:
-        model = Comment
-        fields = ['id', 'quote', 'created_at', 'user', 'content']

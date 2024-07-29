@@ -1,5 +1,3 @@
-
-
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.response import Response
 from rest_framework import status
@@ -13,15 +11,10 @@ from django.shortcuts import get_object_or_404
 from rest_framework.views import APIView
 # from .db_utils import vector_connect
 
-
-
-
 class QuoteViewSet(ModelViewSet):
     queryset = Quote.objects.all()
     serializer_class = QuoteSerializer
-    
-    
-    
+
 class QuoteLikeView(APIView):
     # authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticatedOrReadOnly]
@@ -45,10 +38,8 @@ class QuoteLikeView(APIView):
             quote.save()
             return Response('추가되었습니다', status=status.HTTP_200_OK)
 
-
 class CommentView(APIView):
-
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [IsAuthenticatedOrReadOnly] # GET 요청과 같은 안전한(read-only) 메소드에 대해서는 인증 없이 접근 허용
 
     # 게시물에 해당하는 전체 댓글 조회
     def get(self, request, pk):

@@ -1,15 +1,3 @@
-# from django.contrib import admin
-# from django.urls import path,include
-# from .views import QuoteViewSet, Likevie
-# from rest_framework.routers import DefaultRouter
-
-# router = DefaultRouter()
-# router.register(r'quotes', QuoteViewSet)
-
-# urlpatterns = [
-#     path('', include(router.urls)),
-# ]
-
 from django.urls import path
 from .views import QuoteViewSet, QuoteLikeView,CommentView
 
@@ -19,6 +7,4 @@ urlpatterns = [
     path('quotes/<int:pk>/', QuoteViewSet.as_view({'get': 'retrieve', 'put': 'update', 'patch': 'partial_update', 'delete': 'destroy'}), name='quote-detail'),
     path('quotes/<int:pk>/like/', QuoteLikeView.as_view()),
     path('quotes/<int:pk>/comment/',CommentView.as_view()),
-
-   
 ]

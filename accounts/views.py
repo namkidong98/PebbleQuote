@@ -16,7 +16,9 @@ from rest_framework.permissions import IsAuthenticatedOrReadOnly,IsAuthenticated
 
 User = get_user_model()
 
-class RegisterView(generics.CreateAPIView):
+class RegisterView(generics.ListCreateAPIView):
+    # generics.CreateAPIView는 POST요청만을 허용
+    # ListCreateAPIView로 변경하여 GET 요청으로 유저 조회 기능 추가
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = [AllowAny]  #인증 불필요
