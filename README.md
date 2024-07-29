@@ -1,23 +1,41 @@
 # new_backend
 
 
-
 ## 업데이트 이력
 - [2024-07-23 나현진] 유저 CRUD & 로그인, 명언 CRUD, postgreSQL 연결 및 초기화
+- [2024-07-28 정혜나] Quote CRUD, Comment, Like 기능 구현
+- [2024-07-29 남기동] account 필드 제거, superuser 정상화, output field 조정
 
 <br>
 
 ## 설치방법
 
 ```
-git clone https://github.com/mukzzanglion-team2/new_backend.git
-cd new_backend
-python -m venv venv
-source ./venv/Scripts/activate
-pip install -r requirements.tx
+$ git clone https://github.com/mukzzanglion-team2/new_backend.git
+$ cd new_backend
+$ python -m venv venv
+$ source ./venv/Scripts/activate
+$ pip install -r requirements.txt
+
+# 필요에 따라 PostgreSQL Docker Container 생성 및 실행
+$ docker run -p 5432:5432 --name test-postgres -e POSTGRES_PASSWORD=1234 -e TZ=Asia/Seoul -d postgres:latest
+# docker exec -it {container_id} bash --> psql -U postgres --> create database quote_db; --> exit --> exit
+
+# accounts, quote의 models.py에 ForeignKey, ManyToManyField 주석처리하고
+$ python manage.py makemigrations account
+$ python manage.py makemigrations quote
+$ python manage.py migrate
+
+# accoutns, quote의 models.py에 주석처리한 부분 해제하고
+$ python manage.py makemigrations account
+$ python manage.py makemigrations quote
+$ python manage.py migrate
+
+$ python manage.py createsuperuser
+# email, nickname, password 입력하면 유저 생성
+
+$ python manage.py runserver
 ```
-
-
 
 
 ## .env 파일
@@ -25,14 +43,11 @@ pip install -r requirements.tx
 SECRET_KEY = 'django-insecure-p8+g6!$v=)5e3_bfwn&la9f8y95ccx=awv&3$-t1oe(nkgcbsf'
 KAKAO_REST_API_KEY='217fcb126e662a8cbaa60bff80aa32df'
 DB_NAME= 'quote_db'
-DB_USER='root'
-DB_PASSWORD='likelion12th_quote'
+DB_USER='postgres'
+DB_PASSWORD='1234'
 DB_HOST='localhost'
 DB_PORT='5432'
 ```
-
-
-
 
 
 ## Directory Tree
@@ -63,52 +78,48 @@ project/
 ```
 
 
-
-
-
-
 ## Model Schema
 ```
 User {
-	_id : ObjectID(자동 생성, PK)
+	id : PK(auto_increment)
 	
 	# Not NULL
 	email : email
 	password : str(~30)
-	nickname : str(1~20)
-	name : str(~50)
-	age : int(1~100)
-	sex : Literal['male', 'female']
-	birth : str(format:2000-01-01)
-	phone : str(format:010-0000-1111)
+	nickname : str(~50)
 	
-	# NULL --> []로 초기화
-	followers : List[user_id] = []
-	following : List[user_id] = []
-	regiestered_quotes : List[quote_id] = []
+	# NULL
 	liked_quotes : List[quote_id] = []
+	is_active : True
+	is_staff : False(superuser만 True)
 }
 
 Quote {
-	_id : ObjectID(자동 생성, PK)
+	id : PK(auto_increment)
 	
 	# Not NULL
 	content: str(~100)
 	description : str(~500)   
-	author : str              # 해당 명언의 발화자(원저작자)
-	registrant : str(user_id) # 등록한 사람(User)
-	tag : List[str]
+	author : str(~100)        # 해당 명언의 발화자(원저작자)
 	
-	# NULL --> []이나 NULL, 0으로 초기화
+	# NULL
 	image : ImageField
-	likes: int
-	comments : List[str] = []
-	created_at : datetime
+	created_at : Datetime
+	like_count: PositiveInteger	
+}
+
+Comment {
+	id : PK(auto_increment)
+
+	# Not NULL
+	content : TextField
+	quote : Quote.id
+	user : User.nickname
+
+	# NULL
+	created_at : Datetime
 }
 ```
-
-
-
 
 
 ## 참고할 노션 페이지
