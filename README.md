@@ -4,7 +4,7 @@
 
 ## 업데이트 이력
 - [2024-07-23 나현진] 유저 CRUD & 로그인, 명언 CRUD, postgreSQL 연결 및 초기화
-- [2024-07-28 정혜나] 명언 CRUD, 명언 좋아요 기능, 유저 프로파일 get 추가 
+- [2024-07-28 정혜나] Quote CRUD, 좋아요, 댓글 기능 구현, account ProfileView 추가 
 
 <br>
 
