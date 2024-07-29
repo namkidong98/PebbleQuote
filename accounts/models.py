@@ -28,7 +28,7 @@ class User(AbstractBaseUser,PermissionsMixin):
     nickname = models.CharField(max_length=50)
     
     like_quotes = models.ManyToManyField(settings.QUOTE_MODEL, blank=True, related_name='like_quotes') #좋아요 한 명언목록
-    register_quotes=models.ManyToOneRel
+   
 
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
