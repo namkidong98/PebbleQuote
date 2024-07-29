@@ -5,6 +5,7 @@
 - [2024-07-23 나현진] 유저 CRUD & 로그인, 명언 CRUD, postgreSQL 연결 및 초기화
 - [2024-07-28 정혜나] Quote CRUD, 좋아요, 댓글 기능 구현, account ProfileView 추가
 - [2024-07-29 남기동] account 필드 제거, superuser 수정, Quote output field 조정
+- [2024-07-29 정혜나] 사용자가 명언 Post 기능 구현, ProfileView 수정  
 
 <br>
 
