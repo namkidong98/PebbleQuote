@@ -3,6 +3,7 @@ from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, Permis
 from django.utils.translation import gettext_lazy as _
 from django.core.validators import RegexValidator
 from django.contrib.postgres.fields import ArrayField
+from django.conf import settings
 # Create your models here.
 
 class UserManager(BaseUserManager):
@@ -32,23 +33,16 @@ class User(AbstractBaseUser,PermissionsMixin):
     nickname = models.CharField(max_length=50)
     name = models.CharField(max_length=50)
     age = models.PositiveIntegerField()
-    SEX_CHOICES = [
-        ('male', 'Male'),
-        ('female', 'Female'),
-    ]
-    sex = models.CharField(max_length=6, choices=SEX_CHOICES)
-    birth = models.DateField()
     phone_regex = RegexValidator(
         regex=r'^010-\d{4}-\d{4}$',
         message="Phone number must be entered in the format: '010-0000-0000'."
     )
     phone = models.CharField(validators=[phone_regex], max_length=13)
 
-    followers = ArrayField(models.PositiveIntegerField(), default=list, blank=True)
-    following = ArrayField(models.PositiveIntegerField(), default=list, blank=True)
-    registered_quotes = ArrayField(models.PositiveIntegerField(), default=list, blank=True)
-    # liked_quotes = ArrayField(models.PositiveIntegerField(), default=list, blank=True)
-    duplicate_quotes=ArrayField(models.PositiveIntegerField(), default=list, blank=True) #추천받은 명언 리스트 저장(중복 추천 방지)
+
+    
+    like_quotes = models.ManyToManyField(settings.QUOTE_MODEL, blank=True, related_name='like_quotes') #좋아요 한 명언목록록
+
 
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
@@ -56,15 +50,15 @@ class User(AbstractBaseUser,PermissionsMixin):
     objects = UserManager()
 
     USERNAME_FIELD = 'email' #사용자 이름으로 이메일 사용
-    REQUIRED_FIELDS = ['nickname', 'name', 'age', 'sex', 'birth', 'phone']
+    REQUIRED_FIELDS = ['nickname', 'name', 'phone']
 
     def __str__(self):
         return self.email
     
-    def add_duplicate_quote(self,quote_id):
-        if quote_id not in self.duplicate_quotes:
-            self.duplicate_quotes.append(quote_id)
-            self.save()
+    # def add_duplicate_quote(self,quote_id):
+    #     if quote_id not in self.duplicate_quotes:
+    #         self.duplicate_quotes.append(quote_id)
+    #         self.save()
 
             
 

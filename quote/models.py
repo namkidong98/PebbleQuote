@@ -12,21 +12,24 @@ class Quote(models.Model):
   
 
     image = models.ImageField(upload_to='quotes/', null=True, blank=True)
-    liked_by = models.ManyToManyField(
-        User,
-        related_name='liked_quotes',
-        blank=True
-    )
-    comments = models.TextField(null=True, blank=True)
+    # liked_by = models.ManyToManyField(
+    #     User,
+    #     related_name='liked_quotes',
+    #     blank=True
+    # )
+    
     created_at = models.DateTimeField(auto_now_add=True)
     like_count = models.PositiveIntegerField(default=0)
     def __str__(self):
         return self.content
     
-
-# class Tag(models.Model):
-#     name=models.CharField(max_length=50)
-
-#     def __str__(self):
-#         return self.name
+class Comment(models.Model):
     
+    quote = models.ForeignKey(Quote, null=True, blank=True, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, null=True, blank=True, on_delete=models.CASCADE)
+    content = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+   
+
+    def __str__(self):
+        return self.content
