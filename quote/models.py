@@ -12,11 +12,10 @@ class Quote(models.Model):
     image = models.ImageField(upload_to='quotes/', null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     like_count = models.PositiveIntegerField(default=0)
-    # liked_by = models.ManyToManyField(
-    #     User,
-    #     related_name='liked_quotes',
-    #     blank=True
-    # )
+    
+    #직접 명언 생성한 유저들
+    user_author = models.ForeignKey(User, null=True, blank=True, on_delete=models.SET_NULL, related_name='user_author')
+
     def __str__(self):
         return self.content
     

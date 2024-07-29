@@ -6,7 +6,7 @@ from accounts.models import User
 class QuoteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Quote
-        fields = ['id', 'content', 'description', 'author', 'image', 'created_at','like_count']
+        fields = ['id', 'content', 'description', 'author', 'image', 'created_at','like_count','user_author']
 
 class CommentSerializer(serializers.ModelSerializer):
     user = serializers.ReadOnlyField(source='user.nickname')

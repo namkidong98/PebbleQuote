@@ -1,6 +1,7 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 from rest_framework.permissions import IsAuthenticated
+from quote.serializers import QuoteSerializer 
 
 from accounts.models import User
 
@@ -26,6 +27,7 @@ class LoginSerializer(serializers.Serializer):
 
 class ProfileSerializer(serializers.ModelSerializer):
     like_quotes = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
+    # created_quotes = QuoteSerializer(many=True, read_only=True, source='created_quotes') 
 
     class Meta:
         model = User
