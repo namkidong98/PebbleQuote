@@ -49,6 +49,9 @@ DB_USER='postgres'
 DB_PASSWORD='1234'
 DB_HOST='localhost'
 DB_PORT='5432'
+UPSTAGE_API_KEY = "up_ZkSUCtOpUsc5oeVuCVe8zcnVKTEPj"
+CHROMA_HOST = "20.249.183.16"
+CHROMA_PORT = "8001"
 ```
 
 
