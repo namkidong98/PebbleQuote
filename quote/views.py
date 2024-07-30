@@ -1,20 +1,81 @@
 from rest_framework.viewsets import ModelViewSet
+from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.permissions import AllowAny, IsAuthenticated, IsAuthenticatedOrReadOnly
+from django.shortcuts import get_object_or_404
+
+from database.database import vector_connect
 from .models import Quote,User,Comment
 from .serializers import QuoteSerializer,CommentSerializer
-from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.authentication import TokenAuthentication
-from rest_framework.permissions import IsAuthenticatedOrReadOnly
-from django.shortcuts import get_object_or_404
-from rest_framework.views import APIView
-# from .db_utils import vector_connect
 
+# 명언 전반에 대한 CRUD(w/o 인증 Token)
 class QuoteViewSet(ModelViewSet):
     queryset = Quote.objects.all()
     serializer_class = QuoteSerializer
+
+    def list(self, request):
+        queryset = self.get_queryset().order_by('-like_count') # like_counts 기준 내림차순
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
     
+    def create(self, request):
+        data = {
+            'content': request.data.get('content'),
+            'description': request.data.get('description'),
+            'author': request.data.get('author') # 원 발화자(유저랑 별개)
+        }
+        serializer = QuoteSerializer(data=data)
+        if serializer.is_valid():
+            quote_instance = serializer.save()
+
+            # ChromaDB 연결해보고 연결되면 ChromaDB에도 삽입
+            manager = vector_connect()
+            if manager.connected:
+                manager.add_quote(
+                    description = quote_instance.description,
+                    quote_id = quote_instance.id,
+                    quote = quote_instance.content,
+                    author = quote_instance.author,
+                )
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def update(self, request, pk, partial=False):
+        quote = get_object_or_404(Quote, pk=pk)
+        serializer = self.get_serializer(quote, data=request.data, partial=partial)
+        if serializer.is_valid():
+            quote_instance = serializer.save()
+
+            if ('content' in request.data) or ('description' in request.data) or ('author' in request.data):
+                # ChromaDB에 업데이트(없애고 새로 만들기)
+                manager = vector_connect()
+                if manager.connected:
+                    manager.delete_quote_by_quote_id(quote_id = quote_instance.id)
+                    manager.add_quote(
+                        description=quote_instance.description,
+                        quote_id=quote_instance.id,
+                        quote=quote_instance.content,
+                        author=quote_instance.author,
+                    )
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def partial_update(self, request, pk):
+        return self.update(request, pk, partial=True)
+
+    def destroy(self, request, pk):
+        quote = get_object_or_404(Quote, pk=pk)
+        quote_id = quote.id # 삭제되고 나면 해당 객체의 id 추출이 안되기 때문에 미리 저장
+        quote.delete() # PostgreSQL에서 삭제
+        
+        # ChromaDB에서 삭제
+        manager = vector_connect()
+        if manager.connected:
+            manager.delete_quote_by_quote_id(quote_id=quote_id)
+
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
 # class QuoteRegisterViewSet(ModelViewSet):
 #     queryset = Quote.objects.all()
 #     serializer_class = QuoteSerializer
@@ -27,6 +88,7 @@ class QuoteViewSet(ModelViewSet):
 #             return Response(serializer.data, status=status.HTTP_201_CREATED)
 #         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+# 유저가 명언을 등록하는 경우(인증 Token 필요)
 class QuoteRegisterView(APIView):
     permission_classes = [IsAuthenticatedOrReadOnly]
 
@@ -39,7 +101,18 @@ class QuoteRegisterView(APIView):
         }
         serializer = QuoteSerializer(data=data)
         if serializer.is_valid():
-            serializer.save()
+            quote_instance = serializer.save()
+
+            # ChromaDB 연결해보고 연결되면 ChromaDB에도 삽입
+            manager = vector_connect()
+            if manager.connected:
+                manager.add_quote(
+                    description = quote_instance.description,
+                    quote_id = quote_instance.id,
+                    quote = quote_instance.content,
+                    author = quote_instance.author,
+                )
+
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -83,6 +156,44 @@ class CommentView(APIView):
         comment.user = request.user
         comment.save()
         return Response(data="생성되었습니다", status=status.HTTP_200_OK)
+
+# 댓글 전체 조회 및 전체 삭제
+class CommentAdminView(APIView):
+    permission_classes = [AllowAny]  # 인증 불필요 -> 관리자용이기 때문, 이후에 IsAdminUser로 변경?
+
+    def get(self, request):
+        comment = Comment.objects.all()
+        serializer = CommentSerializer(comment, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    # 서버 내부에서 scheduler를 설정해서 일정 시간에 해당 API를 호출해서 전체 Comment를 삭제하도록 구현 예정
+    def delete(self, request):
+        count, _ = Comment.objects.all().delete()
+        return Response({"Message" : f"Deleted {count} comments."}, status=status.HTTP_204_NO_CONTENT)
+
+class RecommendQuoteView(APIView):
+    permission_classes = [IsAuthenticatedOrReadOnly]
+
+    def post(self, request, *args, **kwargs):
+        try:
+            query = request.data.get('query')
+            if not query:
+                return Response({'error': 'Query parameter is required'}, status=status.HTTP_400_BAD_REQUEST)
+            manager = vector_connect()
+            retrieved_quotes = manager.search_quote(query=query, quote_num=3) # 3개의 상위 추천 Quote List
+            data = []
+            for retrieved_quote, relevance_score in retrieved_quotes: # relevance는 작아야 유사도가 높은 것
+                data.append(
+                    {
+                        'author': retrieved_quote.metadata.get('author'),
+                        'quote': retrieved_quote.metadata.get('quote'),
+                        'description': retrieved_quote.page_content,
+                        'score': relevance_score,
+                    }
+                )
+            return Response(data, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
     # # 게시물에 해당하는 단일 댓글 수정
     # def put(self, request, pk, comment_pk):

@@ -56,6 +56,7 @@ INSTALLED_APPS = [
     'allauth.socialaccount.providers.kakao', #카카오
 
     #app
+    "config.apps.ConfigAppConfig", # 프로젝트 초기화를 담당하는 앱 등록
     'quote',
     'accounts',
 ]
