@@ -14,6 +14,34 @@ from rest_framework.views import APIView
 class QuoteViewSet(ModelViewSet):
     queryset = Quote.objects.all()
     serializer_class = QuoteSerializer
+    
+# class QuoteRegisterViewSet(ModelViewSet):
+#     queryset = Quote.objects.all()
+#     serializer_class = QuoteSerializer
+#     permission_classes = [IsAuthenticated]
+
+#     def create(self, request, *args, **kwargs):
+#         serializer = self.get_serializer(data=request.data)
+#         if serializer.is_valid():
+#             serializer.save(author=request.user.nickname, user=request.user)  # 작성자의 닉네임과 사용자 객체를 저장
+#             return Response(serializer.data, status=status.HTTP_201_CREATED)
+#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class QuoteRegisterView(APIView):
+    permission_classes = [IsAuthenticatedOrReadOnly]
+
+    def post(self, request, *args, **kwargs):
+        data = {
+            'content': request.data.get('content'),
+            'description': request.data.get('description'),
+            'author': request.user.nickname,
+            'user_author': request.user.id
+        }
+        serializer = QuoteSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class QuoteLikeView(APIView):
     # authentication_classes = [TokenAuthentication]

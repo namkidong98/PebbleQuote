@@ -27,7 +27,8 @@ class User(AbstractBaseUser,PermissionsMixin):
     email = models.EmailField(_('email address'), unique=True)
     nickname = models.CharField(max_length=50)
     
-    like_quotes = models.ManyToManyField(settings.QUOTE_MODEL, blank=True, related_name='like_quotes') #좋아요 한 명언목록록
+    like_quotes = models.ManyToManyField(settings.QUOTE_MODEL, blank=True, related_name='like_quotes') #좋아요 한 명언목록
+   
 
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)

@@ -1,6 +1,7 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 from rest_framework.permissions import IsAuthenticated
+from quote.serializers import QuoteSerializer, QuoteForProfileSerializer
 
 from accounts.models import User
 
@@ -26,7 +27,8 @@ class LoginSerializer(serializers.Serializer):
 
 class ProfileSerializer(serializers.ModelSerializer):
     like_quotes = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
+    registered_quotes = QuoteForProfileSerializer(many=True, read_only=True) # Quote에 foreign key 로 들어간 user id 역참조 
 
     class Meta:
         model = User
-        fields = ['nickname', 'like_quotes', 'email']
+        fields = ['nickname', 'like_quotes', 'email','registered_quotes']
