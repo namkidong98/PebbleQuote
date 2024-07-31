@@ -5,7 +5,18 @@
 - [2024-07-23 나현진] 유저 CRUD & 로그인, 명언 CRUD, postgreSQL 연결 및 초기화
 - [2024-07-28 정혜나] Quote CRUD, 좋아요, 댓글 기능 구현, account ProfileView 추가
 - [2024-07-29 남기동] account 필드 제거, superuser 수정, Quote output field 조정
-- [2024-07-29 정혜나] 사용자가 명언 Post 기능 구현, ProfileView 수정  
+- [2024-07-29 정혜나] 사용자가 명언 Post 기능 구현, ProfileView 수정
+- [2024-07-30 남기동] Chroma 연결, Quote CRUD와 연동, CommentAdminView 생성, 명언 추천 기능 구현, 명언 좋아요 내림차순 조회 구현
+- [2024-07-31 남기동] 서버 설정 관련 명령어(server.md) 업로드, settings.py의 ALLOW_HOST=['*']로 변경(외부 접속 허용을 위해)
+
+<br>
+
+## 서버 이용 방법
+- pem키 사용 없이 ID, Password로 접속 가능하게 변경해두었습니다
+- Putty에서 Host Name에 15.164.27.255, Port 22로 설정하고 Open
+- ID : ec2-user
+- PASSWORD : shinsudong
+- (확인용) 'http://15.164.27.255/quote/', 'http://15.164.27.255/accounts/register/'로 체크 가능
 
 <br>
 
@@ -48,6 +59,9 @@ DB_USER='postgres'
 DB_PASSWORD='1234'
 DB_HOST='localhost'
 DB_PORT='5432'
+UPSTAGE_API_KEY = "up_ZkSUCtOpUsc5oeVuCVe8zcnVKTEPj"
+CHROMA_HOST = "20.249.183.16"
+CHROMA_PORT = "8001"
 ```
 
 
@@ -125,9 +139,3 @@ Comment {
 
 ## 참고할 노션 페이지
 <https://www.notion.so/rmdnps10/Back-End-60d517d1690b44bc9d4c0ded0b839ec9>
-
-
-
-
-
-
