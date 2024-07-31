@@ -17,6 +17,7 @@
 - ID : ec2-user
 - PASSWORD : shinsudong
 - (확인용) 'http://15.164.27.255/quote/', 'http://15.164.27.255/accounts/register/' 로 체크 가능
+- (Admin 'http://15.164.27.255/admin/' ) Email : admin@google.com, Password : admin 
 
 <br>
 
