@@ -8,6 +8,7 @@
 - [2024-07-29 정혜나] 사용자가 명언 Post 기능 구현, ProfileView 수정
 - [2024-07-30 남기동] Chroma 연결, Quote CRUD와 연동, CommentAdminView 생성, 명언 추천 기능 구현, 명언 좋아요 내림차순 조회 구현
 - [2024-07-31 남기동] 서버 설정 관련 명령어(server.md) 업로드, settings.py의 ALLOW_HOST=['*']로 변경(외부 접속 허용을 위해)
+- [2024-07-31 정혜나] 팔로잉 기능 구현
 
 <br>
 
