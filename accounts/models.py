@@ -28,6 +28,9 @@ class User(AbstractBaseUser,PermissionsMixin):
     nickname = models.CharField(max_length=50)
     
     like_quotes = models.ManyToManyField(settings.QUOTE_MODEL, blank=True, related_name='like_quotes') #좋아요 한 명언목록
+    followings = models.ManyToManyField('self', symmetrical=False, related_name='followers') #팔로잉 다대다 #self 인 이유는 유저끼리 이루어지는 것이기 때문
+    follower_count = models.PositiveIntegerField(default=0)  # 팔로워 수
+    following_count = models.PositiveIntegerField(default=0)  #팔로잉 수
    
 
     is_active = models.BooleanField(default=True)

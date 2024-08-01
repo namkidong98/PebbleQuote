@@ -76,17 +76,6 @@ class QuoteViewSet(ModelViewSet):
 
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-# class QuoteRegisterViewSet(ModelViewSet):
-#     queryset = Quote.objects.all()
-#     serializer_class = QuoteSerializer
-#     permission_classes = [IsAuthenticated]
-
-#     def create(self, request, *args, **kwargs):
-#         serializer = self.get_serializer(data=request.data)
-#         if serializer.is_valid():
-#             serializer.save(author=request.user.nickname, user=request.user)  # 작성자의 닉네임과 사용자 객체를 저장
-#             return Response(serializer.data, status=status.HTTP_201_CREATED)
-#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 # 유저가 명언을 등록하는 경우(인증 Token 필요)
 class QuoteRegisterView(APIView):

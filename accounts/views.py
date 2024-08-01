@@ -8,6 +8,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import redirect
 from rest_framework.permissions import AllowAny, IsAuthenticatedOrReadOnly,IsAuthenticated
 from .serializers import UserSerializer, LoginSerializer, ProfileSerializer
+from django.shortcuts import get_object_or_404
 import os
 
 User = get_user_model()
@@ -52,3 +53,28 @@ class ProfileView(APIView):
         serializer = ProfileSerializer(user)
         # 직렬화된 데이터 응답
         return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    
+class FollowView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, pk):
+        user_to_follow = get_object_or_404(User, pk=pk)
+        current_user = request.user
+
+        if user_to_follow in current_user.followings.all(): #팔로워 하려는 유저가 팔로잉에 이미 있는데 다시 팔로우 버튼 누르면
+            current_user.followings.remove(user_to_follow) #삭제 (언팔한 거임)
+            current_user.following_count -= 1 #현재 유저 팔로잉 수 줄어들고
+            user_to_follow.follower_count -= 1 #팔로우 하려했던 유저는 팔로워 수 줄어들고
+            current_user.save()
+            user_to_follow.save()
+            return Response({'팔로우를 취소했습니다.'}, status=status.HTTP_200_OK)
+        else:
+            current_user.followings.add(user_to_follow) #팔로워 하려는 유저가 현재 팔로잉 목록에 없는데 팔로우 버튼 누를 시 팔로우 됨
+            current_user.following_count += 1 #현재 유저 팔로잉 수 늘어나고
+            user_to_follow.follower_count += 1 #팔로워하려했던 유저 팔로워 수 늘어나고
+            current_user.save()
+            user_to_follow.save()
+            return Response({ '팔로우했습니다.'}, status=status.HTTP_200_OK)
+        
+
