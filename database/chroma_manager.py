@@ -81,11 +81,12 @@ class ChromaManager():
 
     def search_quote(self, query: str, quote_num : int):
         query_vector = self.embedding_function_query.embed_query(query) # List[Float]
-        retrieved_quote = self.quote_db.similarity_search_by_vector_with_relevance_scores(
+        retrieved_quotes = self.quote_db.similarity_search_by_vector_with_relevance_scores(
             embedding = query_vector,
             k = quote_num
         )
         # retrieved_quote = self.quote_db.similarity_search( # query에 대한 임베딩은 'solar-embedding-1-large-query'를 사용
         #     query=query, k=1, embedding_function=self.embedding_function_query
         # )
-        return retrieved_quote  # List[Tuple[Document, float]]
+        retrieved_quotes = sorted(retrieved_quotes, key=lambda x:x[1]) # score를 기준으로 오름차순 정렬(스코어가 낮은 명언들부터 앞으로 오게)
+        return retrieved_quotes  # List[Tuple[Document, float]]

@@ -12,7 +12,8 @@ class Quote(models.Model):
     image = models.ImageField(upload_to='quotes/', null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     like_count = models.PositiveIntegerField(default=0)
-    
+    quote_viewers = models.ManyToManyField(settings.AUTH_USER_MODEL, blank=True, related_name='quote_viewers') # 다대다 관계, 해당 명언 조회한 User id 리스트
+
     #명언 직접 생성한 유저들
     user_author = models.ForeignKey(User, null=True, blank=True, on_delete=models.SET_NULL, related_name='registered_quotes')
 

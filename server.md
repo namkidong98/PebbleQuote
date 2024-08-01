@@ -270,6 +270,31 @@ sudo systemctl status mariadb # inactive, disabled인지 확인
 <br>
 
 17. Fail2Ban 설정 (무작위 스캔 공격 방지)
-```
+```bash
 # Amazon Linux에서는 이것도 지원 안한다고 해서 수동 설치가 필요하다해서 그냥 포기
+```
+
+<br>
+
+18. 스케줄러 설정
+```bash
+sudo yum install cronie -y       # cron 설치
+sudo service crond start         # cron 서비스 활성화
+sudo chkconfig crond on          # 자동 실행 설정(enable)
+
+sudo yum install curl -y         # 이미 설치 되어있으면 생략
+
+sudo nano daily_request.sh       # 필요한 기능을 담은 스크립트 작성
+# #!/bin/bash
+# curl -X DELETE http://15.164.27.255/quote/comment/
+# curl -X DELETE http://15.164.27.255/quote/view-clear/
+
+sudo chmod +x daily_request.sh   # 실행권한 부여
+date                             # 현재 서버 시간 확인
+crontab -e                       # 크론 편집기 실행
+# 0 6 * * * ~/daily_request.sh
+# (분, 시간, 일, 월, 요일 / *은 all을 의미, 마지막은 실행할 스크립트 경로)
+# (요일은 0~7의 값이고 0, 7은 일요일을 의미)
+
+crontab -l                       # 크론 작업 확인
 ```

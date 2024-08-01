@@ -155,7 +155,7 @@ class CommentAdminView(APIView):
         serializer = CommentSerializer(comment, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    # 서버 내부에서 scheduler를 설정해서 일정 시간에 해당 API를 호출해서 전체 Comment를 삭제하도록 구현 예정
+    # 서버 내의 cron으로 일정 시간마다 해당 API를 호출해서 전체 명언의 조회 삭제하도록 구현
     def delete(self, request):
         count, _ = Comment.objects.all().delete()
         return Response({"Message" : f"Deleted {count} comments."}, status=status.HTTP_204_NO_CONTENT)
@@ -168,21 +168,81 @@ class RecommendQuoteView(APIView):
             query = request.data.get('query')
             if not query:
                 return Response({'error': 'Query parameter is required'}, status=status.HTTP_400_BAD_REQUEST)
+            
             manager = vector_connect()
-            retrieved_quotes = manager.search_quote(query=query, quote_num=3) # 3개의 상위 추천 Quote List
-            data = []
+            retrieved_quotes = manager.search_quote(query=query, quote_num=10) # 10개의 상위 추천 Quote List
+            # data = []
             for retrieved_quote, relevance_score in retrieved_quotes: # relevance는 작아야 유사도가 높은 것
-                data.append(
-                    {
+                quote_id = retrieved_quote.metadata.get('quote_id')
+                quote = get_object_or_404(Quote, pk=quote_id)
+                check_quote_view = quote.quote_viewers.filter(id=request.user.id) # 명언을 조회한 적 있는지 확인
+                if check_quote_view.exists():   # 이미 해당 유저가 조회한 적 있는 명언이면
+                    continue                    # 다음 명언으로 넘어가고
+                # 해당 명언으로 보내기로 결정했으면,
+                user = get_object_or_404(User, id=request.user.id)  # 현재 유저
+                quote.quote_viewers.add(user)                       # 조회 목록에 넣기
+                quote.save()                                        
+                return Response(
+                    data = {
+                        'quote_id' : retrieved_quote.metadata.get('quote_id'),
                         'author': retrieved_quote.metadata.get('author'),
                         'quote': retrieved_quote.metadata.get('quote'),
                         'description': retrieved_quote.page_content,
                         'score': relevance_score,
-                    }
+                    },
+                    status = status.HTTP_200_OK
                 )
-            return Response(data, status=status.HTTP_200_OK)
+            # 전체 Top K개를 다 순회해서 조사했음에도 모두 조회한 기록이 있다면, 그냥 맨 앞의 명언을 반환
+            return Response(
+                data = {
+                    'quote_id' : retrieved_quotes[0][0].metadata.get('quote_id'),
+                    'author': retrieved_quotes[0][0].metadata.get('author'),
+                    'quote': retrieved_quotes[0][0].metadata.get('quote'),
+                    'description': retrieved_quotes[0][0].page_content,
+                    'score': retrieved_quotes[0][1],
+                },
+                status = status.HTTP_200_OK
+            )
+                # data.append( # 다 보여주는건데 일단 보류
+                #     {
+                #         'quote_id' : retrieved_quote.metadata.get('quote_id'),
+                #         'author': retrieved_quote.metadata.get('author'),
+                #         'quote': retrieved_quote.metadata.get('quote'),
+                #         'description': retrieved_quote.page_content,
+                #         'score': relevance_score,
+                #     }
+                # )
+            # return Response(data, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+# 유저 명언 조회 기능 : 따로 user_id, quote_id가 있을 때 해당 quote에 조회한 사람 목록으로 user_id를 넣는 APIView 만들기
+# user_id는 Header Auth Token에서 가져오고 quote_id는 url의 pk로 입력해서 호출
+class QuoteUserView(APIView):
+    permission_classes = [IsAuthenticatedOrReadOnly]
+
+    def post(self, request, pk):
+        quote = get_object_or_404(Quote, pk=pk) # 현재 명언
+        user = get_object_or_404(User, id=request.user.id) # 현재 유저
+        # 해당 유저의 조회 여부 파악
+        check_quote_view = quote.quote_viewers.filter(id=user.id)
+        if check_quote_view.exists():
+            return Response(f'{user.nickname}이 Quote {quote.id}를 이미 조회하였습니다', status=status.HTTP_204_NO_CONTENT)
+        else:
+            quote.quote_viewers.add(user)
+            quote.save()
+            return Response(f'{user.nickname}이 Quote {quote.id}를 조회하였습니다.', status=status.HTTP_200_OK)
+
+# 명언 전체 조회 및 전체 삭제
+class QuoteAdminView(APIView):
+    permission_classes = [AllowAny] # 인증 불필요 -> 관리자용이기 때문, 이후에 IsAdminUser로 변경 예정
+
+    # 서버 내의 cron으로 일정 시간마다 해당 API를 호출해서 전체 명언의 조회 삭제하도록 구현
+    def delete(self, request):
+        quotes = Quote.objects.all()
+        for quote in quotes:
+            quote.quote_viewers.clear()  # quote_viewers 리스트 비우기
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     # # 게시물에 해당하는 단일 댓글 수정
     # def put(self, request, pk, comment_pk):

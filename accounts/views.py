@@ -1,13 +1,14 @@
 from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.viewsets import ModelViewSet
 from rest_framework.authtoken.models import Token
 from django.contrib.auth import authenticate
 from django.contrib.auth import get_user_model
 from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import redirect
 from rest_framework.permissions import AllowAny, IsAuthenticatedOrReadOnly,IsAuthenticated
-from .serializers import UserSerializer, LoginSerializer, ProfileSerializer
+from .serializers import UserSerializer, LoginSerializer, ProfileSerializer, ProfileUpdateSerializer
 from django.shortcuts import get_object_or_404
 import os
 
@@ -46,7 +47,7 @@ def kakao_login(request):
 class ProfileView(APIView):
     permission_classes = [IsAuthenticated]
 
-    def get(self, request, *args, **kwargs):
+    def get(self, request, *args, **kwargs): # 유저 프로필 창에 들어갈 내용
         # 현재 인증된 사용자
         user = request.user
         # 사용자 프로필 직렬화
@@ -54,7 +55,19 @@ class ProfileView(APIView):
         # 직렬화된 데이터 응답
         return Response(serializer.data, status=status.HTTP_200_OK)
     
-    
+    def put(self, request):     # 유저 정보 수정 기능
+        user = request.user     # 인증된 유저
+        serializer = ProfileUpdateSerializer(user, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request):  # 탈퇴 기능
+        user = request.user
+        user.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
 class FollowView(APIView):
     permission_classes = [IsAuthenticated]
 
