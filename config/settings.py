@@ -26,6 +26,7 @@ load_dotenv()
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY=os.environ['SECRET_KEY']
+ALGORITHM = os.environ['ALGORITHM']
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -53,7 +54,7 @@ INSTALLED_APPS = [
     'allauth.account',
     'allauth.socialaccount',
     'rest_framework_simplejwt.token_blacklist',
-    'allauth.socialaccount.providers.kakao', #카카오
+    'allauth.socialaccount.providers.kakao',
 
     #app
     "config.apps.ConfigAppConfig", # 프로젝트 초기화를 담당하는 앱 등록
@@ -63,9 +64,8 @@ INSTALLED_APPS = [
 SITE_ID = 1
 
 AUTHENTICATION_BACKENDS = (
-    'django.contrib.auth.backends.ModelBackend',
-
     'allauth.account.auth_backends.AuthenticationBackend',
+    'django.contrib.auth.backends.ModelBackend',
 )
 
 REST_FRAMEWORK = {
@@ -185,10 +185,27 @@ SIMPLE_JWT = {
 }
 
 #로그인/로그아웃 이후 리다이렉트되는 페이지
-LOGIN_REDIRECT_URL = '/'
+LOGIN_REDIRECT_URL = 'main'
 LOGOUT_REDIRECT_URL = '/'
+
+# 로그아웃 버튼 클릭 시 자동 로그아웃
+ACCOUNT_LOGOUT_ON_GET = True
+
 SOCIALACCOUNT_LOGIN_ON_GET = True #중간창 생략
 
 CSRF_TRUSTED_ORIGINS = [
     'http://localhost:8000',  # 개발 서버의 도메인
 ]
+
+# SOCIALACCOUNT_PROVIDERS = {
+#     'kakao': {
+#         'APP': {
+#             'client_id': '217fcb126e662a8cbaa60bff80aa32df',
+#             'secret': 450585,
+#             'key': ''
+#         }
+      
+#     }
+# }
+KAKAO_REST_API_KEY = os.getenv('KAKAO_REST_API_KEY')
+KAKAO_REDIRECT_URI=os.getenv('KAKAO_REDIRECT_URI')

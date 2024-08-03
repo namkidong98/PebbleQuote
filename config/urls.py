@@ -15,14 +15,15 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path,include
+from django.urls import path,include,re_path
+from accounts.views import KakaoLoginView
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/', include('dj_rest_auth.urls')),  #얘는 일단 무시하세여..
-    path('socialaccounts/', include('allauth.urls')), #소셜로그인
-    #카카오 로그인 : /socialaccounts/kakao/login
-    path('accounts/', include('accounts.urls')),  #기본 회원가입,로그인
-    #기본 로그인 : /accoutns/login
-    path('quote/',include('quote.urls')) #quote CRUD urls
+   
+    path('accounts/', include('accounts.urls')), #회원가입,로그인   
+    path('quote/',include('quote.urls')), #quote CRUD urls
+
+    
 ]
