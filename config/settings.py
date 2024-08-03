@@ -26,13 +26,24 @@ load_dotenv()
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY=os.environ['SECRET_KEY']
-ALGORITHM = os.environ['ALGORITHM']
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['*'] # 모든 host 허용
 
+# CORS
+CORS_ORIGIN_ALLOW_ALL=True
+CORS_ALLOW_CREDENTIALS=True
+CORS_ALLOW_METHODS = [
+    'GET', 'POST', 'PUT', 'PATCH', 'DELETE'
+]
+CORS_ALLOW_HEADERS = [
+    'content-type', 'accept', 'accept-encoding',
+    'authorization', 'dnt', 'origin', 'user-agent',
+    'x-csrftoken', 'x-requested-with',
+]
+APPEND_SLASH=False
 
 # Application definition
 
@@ -54,18 +65,21 @@ INSTALLED_APPS = [
     'allauth.account',
     'allauth.socialaccount',
     'rest_framework_simplejwt.token_blacklist',
-    'allauth.socialaccount.providers.kakao',
+    'allauth.socialaccount.providers.kakao', #카카오
 
     #app
     "config.apps.ConfigAppConfig", # 프로젝트 초기화를 담당하는 앱 등록
     'quote',
     'accounts',
+
+    'corsheaders', # 추가
 ]
 SITE_ID = 1
 
 AUTHENTICATION_BACKENDS = (
-    'allauth.account.auth_backends.AuthenticationBackend',
     'django.contrib.auth.backends.ModelBackend',
+
+    'allauth.account.auth_backends.AuthenticationBackend',
 )
 
 REST_FRAMEWORK = {
@@ -83,6 +97,7 @@ ACCOUNT_USERNAME_REQUIRED = False        # username 필드 사용 x
 ACCOUNT_AUTHENTICATION_METHOD = 'email'
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware', # 최상단에 CORS 추가
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -185,27 +200,10 @@ SIMPLE_JWT = {
 }
 
 #로그인/로그아웃 이후 리다이렉트되는 페이지
-LOGIN_REDIRECT_URL = 'main'
+LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
-
-# 로그아웃 버튼 클릭 시 자동 로그아웃
-ACCOUNT_LOGOUT_ON_GET = True
-
 SOCIALACCOUNT_LOGIN_ON_GET = True #중간창 생략
 
 CSRF_TRUSTED_ORIGINS = [
     'http://localhost:8000',  # 개발 서버의 도메인
 ]
-
-# SOCIALACCOUNT_PROVIDERS = {
-#     'kakao': {
-#         'APP': {
-#             'client_id': '217fcb126e662a8cbaa60bff80aa32df',
-#             'secret': 450585,
-#             'key': ''
-#         }
-      
-#     }
-# }
-KAKAO_REST_API_KEY = os.getenv('KAKAO_REST_API_KEY')
-KAKAO_REDIRECT_URI=os.getenv('KAKAO_REDIRECT_URI')
