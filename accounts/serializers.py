@@ -1,24 +1,37 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
-from rest_framework.permissions import IsAuthenticated
 from quote.serializers import QuoteSerializer, QuoteForProfileSerializer
-
 from accounts.models import User
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = (
-            'id', 'email', 'password', 'nickname', 'like_quotes'
+            'id', 'email', 'password', 'nickname','profile_image'
         )
         extra_kwargs = {'password': {'write_only': True}}
 
     def create(self, validated_data):
+        # #profile_image = validated_data.get('profile_image', '/static/default_images/default_profile_image.jpg')
+        if 'profile_image' not in validated_data or not validated_data['profile_image']:
+            validated_data['profile_image'] = 'profile_images/default_profile_image.jpg'
+        # profile_image = validated_data.get('profile_image')
+        # if not profile_image:
+        #     profile_image = 'default_images/default_profile_image.jpg'
+
+
         user = User.objects.create_user(
             email=validated_data['email'],
             password=validated_data['password'],
             nickname=validated_data['nickname'],
+            # profile_image=validated_data.get('profile_image', '/static/default_images/default_profile_image.jpg')
+           
         )
+        profile_image = validated_data.get('profile_image')
+        if profile_image:
+            user.profile_image = profile_image
+            user.save()
+
         return user
 
 class LoginSerializer(serializers.Serializer):
@@ -41,16 +54,16 @@ class ProfileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['nickname', 'like_quotes', 'email','registered_quotes','followings', 'followers', 'following_count','follower_count']
+        fields = ['nickname', 'like_quotes', 'email','profile_image','registered_quotes','followings', 'followers', 'following_count','follower_count']
 
 class ProfileUpdateSerializer(serializers.ModelSerializer):
     current_password = serializers.CharField(write_only=True, required=True)
     new_password = serializers.CharField(write_only=True, required=False)
     new_password_confirm = serializers.CharField(write_only=True, required=False)
-
+    profile_image = serializers.ImageField(required=False)  # 프로필 이미지 필드 추가
     class Meta:
         model = User
-        fields = ['nickname', 'email', 'current_password', 'new_password', 'new_password_confirm']
+        fields = ['nickname', 'email', 'current_password', 'new_password', 'new_password_confirm','profile_image']
 
     def validate(self, data):
         user = self.instance

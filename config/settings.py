@@ -33,9 +33,30 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
+CORS_ORIGIN_ALLOW_ALL=True
+CORS_ALLOW_CREDENTIALS=True
+CORS_ALLOW_METHODS = [
+    'GET', 'POST', 'PUT', 'PATCH', 'DELETE'
+]
+CORS_ALLOW_HEADERS = [
+    'content-type', 'accept', 'accept-encoding',
+    'authorization', 'dnt', 'origin', 'user-agent',
+    'x-csrftoken', 'x-requested-with',
+]
+APPEND_SLASH=False
+
+# CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOWED_ORIGINS = [
+    # # 'http://localhost:3000',  # 프론트엔드 도메인 추가
+    'http://192.168.35.23:3000',
+]
 
 # Application definition
-
+CSRF_TRUSTED_ORIGINS = [
+    'http://localhost:8000',  # 기존 개발 서버 도메인
+    # 'http://localhost:3000',  # 프론트엔드 도메인 추가
+    'http://192.168.35.23:3000',
+]
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -44,7 +65,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.sites', #추가
-
+    'corsheaders',
     'rest_framework',
     'rest_framework_simplejwt',
     'rest_framework.authtoken',
@@ -83,6 +104,7 @@ ACCOUNT_USERNAME_REQUIRED = False        # username 필드 사용 x
 ACCOUNT_AUTHENTICATION_METHOD = 'email'
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -91,6 +113,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'allauth.account.middleware.AccountMiddleware',
+    
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -166,8 +189,11 @@ USE_TZ = True
 MEDIA_URL = "/media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, "static")
+# STATICFILES_DIRS = [
+#     BASE_DIR / "static",
+# ]
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
@@ -193,19 +219,6 @@ ACCOUNT_LOGOUT_ON_GET = True
 
 SOCIALACCOUNT_LOGIN_ON_GET = True #중간창 생략
 
-CSRF_TRUSTED_ORIGINS = [
-    'http://localhost:8000',  # 개발 서버의 도메인
-]
 
-# SOCIALACCOUNT_PROVIDERS = {
-#     'kakao': {
-#         'APP': {
-#             'client_id': '217fcb126e662a8cbaa60bff80aa32df',
-#             'secret': 450585,
-#             'key': ''
-#         }
-      
-#     }
-# }
 KAKAO_REST_API_KEY = os.getenv('KAKAO_REST_API_KEY')
 KAKAO_REDIRECT_URI=os.getenv('KAKAO_REDIRECT_URI')
