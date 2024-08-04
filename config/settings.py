@@ -45,13 +45,17 @@ CORS_ALLOW_HEADERS = [
 ]
 APPEND_SLASH=False
 
-# CSRF
-CSRF_TRUSTED_ORIGINS = [
-    'http://localhost:8000',  # 개발 서버의 도메인
-    'http://15.164.27.255',   # 서버 IP Address
-]
+# CORS_ALLOWED_ORIGINS = [
+#     # # 'http://localhost:3000',  # 프론트엔드 도메인 추가
+#     'http://192.168.35.23:3000',
+# ]
 
-# Application definition
+# # Application definition
+# CSRF_TRUSTED_ORIGINS = [
+#     'http://localhost:8000',  # 기존 개발 서버 도메인
+#     # 'http://localhost:3000',  # 프론트엔드 도메인 추가
+#     'http://192.168.35.23:3000',
+# ]
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -60,7 +64,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.sites', #추가
-
+    'corsheaders',
     'rest_framework',
     'rest_framework_simplejwt',
     'rest_framework.authtoken',
@@ -111,6 +115,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'allauth.account.middleware.AccountMiddleware',
+    
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -209,3 +214,6 @@ SIMPLE_JWT = {
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
 SOCIALACCOUNT_LOGIN_ON_GET = True #중간창 생략
+
+KAKAO_REST_API_KEY = os.getenv('KAKAO_REST_API_KEY')
+KAKAO_REDIRECT_URI=os.getenv('KAKAO_REDIRECT_URI')
