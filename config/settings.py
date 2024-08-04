@@ -26,13 +26,13 @@ load_dotenv()
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY=os.environ['SECRET_KEY']
-ALGORITHM = os.environ['ALGORITHM']
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['*'] # 모든 host 허용
 
+# CORS
 CORS_ORIGIN_ALLOW_ALL=True
 CORS_ALLOW_CREDENTIALS=True
 CORS_ALLOW_METHODS = [
@@ -45,18 +45,17 @@ CORS_ALLOW_HEADERS = [
 ]
 APPEND_SLASH=False
 
-# CORS_ALLOW_ALL_ORIGINS = True
-CORS_ALLOWED_ORIGINS = [
-    # # 'http://localhost:3000',  # 프론트엔드 도메인 추가
-    'http://192.168.35.23:3000',
-]
+# CORS_ALLOWED_ORIGINS = [
+#     # # 'http://localhost:3000',  # 프론트엔드 도메인 추가
+#     'http://192.168.35.23:3000',
+# ]
 
-# Application definition
-CSRF_TRUSTED_ORIGINS = [
-    'http://localhost:8000',  # 기존 개발 서버 도메인
-    # 'http://localhost:3000',  # 프론트엔드 도메인 추가
-    'http://192.168.35.23:3000',
-]
+# # Application definition
+# CSRF_TRUSTED_ORIGINS = [
+#     'http://localhost:8000',  # 기존 개발 서버 도메인
+#     # 'http://localhost:3000',  # 프론트엔드 도메인 추가
+#     'http://192.168.35.23:3000',
+# ]
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -75,18 +74,21 @@ INSTALLED_APPS = [
     'allauth.account',
     'allauth.socialaccount',
     'rest_framework_simplejwt.token_blacklist',
-    'allauth.socialaccount.providers.kakao',
+    'allauth.socialaccount.providers.kakao', #카카오
 
     #app
     "config.apps.ConfigAppConfig", # 프로젝트 초기화를 담당하는 앱 등록
     'quote',
     'accounts',
+
+    'corsheaders', # 추가
 ]
 SITE_ID = 1
 
 AUTHENTICATION_BACKENDS = (
-    'allauth.account.auth_backends.AuthenticationBackend',
     'django.contrib.auth.backends.ModelBackend',
+
+    'allauth.account.auth_backends.AuthenticationBackend',
 )
 
 REST_FRAMEWORK = {
@@ -104,7 +106,7 @@ ACCOUNT_USERNAME_REQUIRED = False        # username 필드 사용 x
 ACCOUNT_AUTHENTICATION_METHOD = 'email'
 
 MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware',
+    'corsheaders.middleware.CorsMiddleware', # 최상단에 CORS 추가
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -174,9 +176,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.0/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'ko-kr'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Seoul'
 
 USE_I18N = True
 
@@ -186,14 +188,12 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 # URL, ROOT 설정
-MEDIA_URL = "/media/"
-MEDIA_ROOT = os.path.join(BASE_DIR, "media")
-
 STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, "static")
-# STATICFILES_DIRS = [
-#     BASE_DIR / "static",
-# ]
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+# 미디어 파일 설정
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
@@ -211,14 +211,9 @@ SIMPLE_JWT = {
 }
 
 #로그인/로그아웃 이후 리다이렉트되는 페이지
-LOGIN_REDIRECT_URL = 'main'
+LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
-
-# 로그아웃 버튼 클릭 시 자동 로그아웃
-ACCOUNT_LOGOUT_ON_GET = True
-
 SOCIALACCOUNT_LOGIN_ON_GET = True #중간창 생략
-
 
 KAKAO_REST_API_KEY = os.getenv('KAKAO_REST_API_KEY')
 KAKAO_REDIRECT_URI=os.getenv('KAKAO_REDIRECT_URI')

@@ -86,8 +86,10 @@ class QuoteRegisterView(APIView):
             'content': request.data.get('content'),
             'description': request.data.get('description'),
             'author': request.user.nickname,
-            'user_author': request.user.id
+            'user_author': request.user.id,
         }
+        if 'image' in request.FILES:
+            data['image'] = request.FILES.get('image')
         serializer = QuoteSerializer(data=data)
         if serializer.is_valid():
             quote_instance = serializer.save()
@@ -140,7 +142,8 @@ class CommentView(APIView):
     # 게시물에 해당하는 댓글 생성
     def post(self, request, pk):
         comment = Comment()
-        comment.content = request.POST['content']
+        # comment.content = request.POST['content']
+        comment.content = request.data.get('content')
         comment.quote = Quote(id=pk)
         comment.user = request.user
         comment.save()

@@ -2,6 +2,7 @@ from django.contrib.auth import get_user_model
 from rest_framework import serializers
 from quote.serializers import QuoteSerializer, QuoteForProfileSerializer
 from accounts.models import User
+from quote.models import Quote
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -75,11 +76,18 @@ class ProfileUpdateSerializer(serializers.ModelSerializer):
         return data
 
     def update(self, instance, validated_data):
+        current_nickname = instance.nickname #현재 닉네임 
         validated_data.pop('current_password', None)
         new_password = validated_data.pop('new_password', None)
         validated_data.pop('new_password_confirm', None)
-        instance = super().update(instance, validated_data)
+        instance = super().update(instance, validated_data) #닉네임 수정
         if new_password:
             instance.set_password(new_password)
             instance.save()
+        if current_nickname != instance.nickname:
+            Quote.objects.filter(user_author=instance).update(author=instance.nickname) #quote author 바뀐 닉네임으로 변경
+        
         return instance
+    
+    
+    
