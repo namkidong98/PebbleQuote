@@ -88,6 +88,8 @@ class QuoteRegisterView(APIView):
             'author': request.user.nickname,
             'user_author': request.user.id
         }
+        if 'image' in request.FILES:
+            data['image'] = request.FILES['image']
         serializer = QuoteSerializer(data=data)
         if serializer.is_valid():
             quote_instance = serializer.save()
