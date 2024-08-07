@@ -174,7 +174,6 @@ class RecommendQuoteView(APIView):
             
             manager = vector_connect()
             retrieved_quotes = manager.search_quote(query=query, quote_num=10) # 10개의 상위 추천 Quote List
-            # data = []
             for retrieved_quote, relevance_score in retrieved_quotes: # relevance는 작아야 유사도가 높은 것
                 quote_id = retrieved_quote.metadata.get('quote_id')
                 quote = get_object_or_404(Quote, pk=quote_id)
@@ -206,16 +205,6 @@ class RecommendQuoteView(APIView):
                 },
                 status = status.HTTP_200_OK
             )
-                # data.append( # 다 보여주는건데 일단 보류
-                #     {
-                #         'quote_id' : retrieved_quote.metadata.get('quote_id'),
-                #         'author': retrieved_quote.metadata.get('author'),
-                #         'quote': retrieved_quote.metadata.get('quote'),
-                #         'description': retrieved_quote.page_content,
-                #         'score': relevance_score,
-                #     }
-                # )
-            # return Response(data, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 

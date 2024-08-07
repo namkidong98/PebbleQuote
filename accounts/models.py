@@ -26,23 +26,12 @@ class UserManager(BaseUserManager):
 class User(AbstractBaseUser,PermissionsMixin):
     email = models.EmailField(_('email address'), unique=True)
     nickname = models.CharField(max_length=50)
-    
-    # profile_image = models.URLField(
-    #     max_length=200, 
-    #     blank=True, 
-    #     null=True, 
-    #     default='/static/default_images/default_profile_image.jpg'  # Set default image URL
-    # )
-
     profile_image = models.ImageField(
         upload_to='profile_images/',
         blank=True,
         null=True,
         default='profile_images/default_profile_image.jpg'
     )
-
-
-
 
     like_quotes = models.ManyToManyField(settings.QUOTE_MODEL, blank=True, related_name='like_quotes') #좋아요 한 명언목록
     followings = models.ManyToManyField('self', symmetrical=False, related_name='followers') #팔로잉 다대다 #self 인 이유는 유저끼리 이루어지는 것이기 때문

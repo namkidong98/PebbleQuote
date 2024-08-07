@@ -298,3 +298,103 @@ crontab -e                       # 크론 편집기 실행
 
 crontab -l                       # 크론 작업 확인
 ```
+
+<br>
+
+19. Django 서버의 Media & Static 경로 리버스 프록시에 추가
+```bash
+sudo nano /etc/nginx/sites-available/django_server # 설정 파일 수정
+# location /static/과 location /media/는 config.settings.py에 선언한 STATIC_URL, MEDIA_URL과 동일하게
+# 각각의 alias는 config.settings.py에 선언한 STATIC_ROOT, MEDIA_ROOT와 동일하게
+
+# server {
+# 	listen 80;
+# 	server_name 15.164.27.255;
+	
+# 	location / {
+# 		proxy_pass http://127.0.0.1:8000;
+# 		proxy_set_header Host $host;
+# 		proxy_set_header X-Real-IP $remote_addr;
+# 		proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+# 		proxy_set_header X-Forwarded-Proto $scheme;
+# 	}
+
+# 	location /static/ {
+# 		alias /home/ec2-user/newbackend/staticfiles/;
+# 	}
+
+# 	location /media/ {
+# 		alias /home/ec2-user/newbackend/media/;
+# 	}
+# }
+sudo rm /etc/nginx/sites-enabled/django_server # 기존 심볼릭 링크를 삭제
+sudo ln -s /etc/nginx/sites-available/django_server /etc/nginx/sites-enabled/ # 설정 파일 활성화(심볼릭 링크 생성)
+sudo nginx -t # nginx 테스트
+sudo systemctl restart nginx # 재실행
+
+sudo nano /etc/nginx/nginx.conf # 기본 설정 파일 수정
+# user ec2-user;                # user를 static, media 권한이 있는 사용자로 변경해야 Nginx가 static, media 파일에 접근하는게 보장된다
+
+# 만약 필요하다면, 해당 디렉토리 파일 권한도 Nginx가 접근할 수 있도록 설정
+# sudo chown -R ec2-user:ec2-user /home/ec2-user/newbackend/staticfiles/
+# sudo chown -R ec2-user:ec2-user /home/ec2-user/newbackend/media/
+# sudo chmod -R 755 /home/ec2-user/newbackend/staticfiles/
+# sudo chmod -R 755 /home/ec2-user/newbackend/media/
+```
+
+<br>
+
+20. HTTPS 설정
+```bash
+# 1. 도메인 구입(https://domain.gabia.com/)
+
+# 2. DNS 설정
+# 타입	호스트	값/위치	        TTL	우선순위
+# A	    @	    15.164.27.255	86400	    # @는 기본 도메인으로 www가 붙지 않은 yourdomain.com IP주소로 매핑
+# A	    www	    15.164.27.255	86400	    # www는 서브 도메인으로 www.yourdomain.com을 IP주소로 매핑
+
+# 3. Certbot 설치 및 인증서 발급
+sudo yum install certbot python3-certbot-nginx
+sudo certbot --nginx -d pebblequote.site -d www.pebblequote.site
+# 필요에 따라 80번 포트가 사용중이라 안된다면, sudo systemctl stop nginx
+# 성공적으로 ssl이 발급되면 /etc/letsencrypt/live/pebblequote.site가 생겨야 한다
+
+# 4. Nginx 설정 파일 생성
+sudo nano /etc/nginx/sites-available/pebblequote
+# server {
+# 	listen 80;
+# 	server_name pebblequote.site www.pebblequote.site;
+
+# 	return 301 https://$host$request_uri;
+# }
+
+# server {
+# 	listen 443 ssl;
+# 	server_name pebblequote.site www.pebblequote.site;
+
+# 	ssl_certificate /etc/letsencrypt/live/pebblequote.site/fullchain.pem;
+# 	ssl_certificate_key /etc/letsencrypt/live/pebblequote.site/privkey.pem;
+
+# 	ssl_protocols TLSv1.2 TLSv1.3;
+# 	ssl_ciphers HIGH:!aNULL:!MD5;
+	
+# 	location /static/ {
+# 		alias /home/ec2-user/newbackend/staticfiles/;
+# 	}
+
+# 	location /media/ {
+# 		alias /home/ec2-user/newbackend/media/;
+# 	}
+
+# 	location / {
+# 		proxy_pass http://127.0.0.1:8000;
+# 		proxy_set_header Host $host;
+# 		proxy_set_header X-Real-IP $remote_addr;
+# 		proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+# 		proxy_set_header X-Forwarded-Proto $scheme;
+# 	}
+# }
+sudo ln -s /etc/nginx/sites-available/pebblequote /etc/nginx/sites-enabled/ # 설정 파일 활성화(심볼릭 링크 생성)
+sudo nginx -t
+sudo systemctl restart nginx
+```
