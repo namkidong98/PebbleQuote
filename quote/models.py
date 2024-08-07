@@ -5,7 +5,7 @@ from django.conf import settings
 class Quote(models.Model):
     # 필수 입력 필드
     content = models.CharField(max_length=100)
-    description = models.CharField(max_length=500)
+    description = models.CharField(max_length=800)
     author = models.CharField(max_length=100)      # 명언 발화자(유명인물 + 명언 직접 생성한 유저들 닉네임)
     
     # 자동 생성 필드
