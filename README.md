@@ -14,17 +14,6 @@
 
 <br>
 
-## 서버 이용 방법
-- pem키 사용 없이 ID, Password로 접속 가능하게 변경해두었습니다
-- Putty에서 Host Name에 15.164.27.255, Port 22로 설정하고 Open
-- ID : ec2-user
-- PASSWORD : shinsudong
-- (확인용) 'http://15.164.27.255/quote/', 'http://15.164.27.255/accounts/register/' 로 체크 가능
-- (Admin 'http://15.164.27.255/admin/' ) Email : admin@google.com, Password : admin 
-
-
-<br>
-
 ## 설치방법
 
 ```bash
@@ -38,6 +27,7 @@ $ pip install -r requirements.txt
 $ docker run -p 5432:5432 --name test-postgres -e POSTGRES_PASSWORD=1234 -e TZ=Asia/Seoul -d postgres:latest
 # docker exec -it {container_id} bash --> psql -U postgres --> create database quote_db; --> exit --> exit
 
+# CircularDependency 에러 처리를 위해
 # accounts, quote의 models.py에 ForeignKey, ManyToManyField 주석처리하고
 $ python manage.py makemigrations account
 $ python manage.py makemigrations quote
